@@ -1,4 +1,20 @@
-/.metadata
-/robots/.settings
-/robots/bin
-eclipse.bat
+# Eclipse
+/bin/
+/.settings/
+
+*target/
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# Package Files 
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar

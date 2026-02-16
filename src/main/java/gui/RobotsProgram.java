@@ -1,3 +1,4 @@
+// Точка входа в программу
 package gui;
 
 import java.awt.Frame;
