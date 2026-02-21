@@ -34,10 +34,17 @@ public class RussianLocalizer {
         UIManager.put("InternalFrame.iconButtonText", "Свернуть");
         UIManager.put("InternalFrame.maximizeButtonText", "Развернуть");
         UIManager.put("InternalFrame.restoreButtonText", "Восстановить");
+        //
+        UIManager.put("InternalFrameTitlePane.restoreButtonText", "Восстановить");
+        UIManager.put("InternalFrameTitlePane.moveButtonText", "Переместить");
+        UIManager.put("InternalFrameTitlePane.sizeButtonText", "Размер");
+        UIManager.put("InternalFrameTitlePane.minimizeButtonText", "Свернуть");
+        UIManager.put("InternalFrameTitlePane.maximizeButtonText", "Развернуть");
+        UIManager.put("InternalFrameTitlePane.closeButtonText", "Закрыть");
         // И их подсказки
         UIManager.put("InternalFrame.closeButtonToolTip", "Закрыть окно");
         UIManager.put("InternalFrame.iconButtonToolTip", "Свернуть окно");
-        UIManager.put("InternalFrame.maximizeButtonToolTip", "Развернуть окно"); // почему то не работает именно эта кнопка
+        UIManager.put("InternalFrame.maxButtonToolTip", "Развернуть окно"); // почему то не работает именно эта кнопка
         UIManager.put("InternalFrame.restoreButtonToolTip", "Восстановить окно");
     }
 }
