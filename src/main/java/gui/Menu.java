@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JMenu;
@@ -19,57 +20,52 @@ public class Menu {
     }
 
     public JMenu createLookAndFeelMenu() {
-        JMenu lookAndFeelMenu = new JMenu("Режим отображения");
-        lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
-        lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(
-                "Управление режимом отображения приложения");
+        JMenu lookAndFeelMenu = createMenu("Режим отображения", KeyEvent.VK_V, "Управление режимом отображения приложения");
         
-        JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
-        systemLookAndFeel.addActionListener((event) -> {
+        addMenuItem(lookAndFeelMenu, "Системная схема", KeyEvent.VK_S, (event) -> {
             frame.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             frame.invalidate();
         });
-        lookAndFeelMenu.add(systemLookAndFeel);
         
-        JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
-        crossplatformLookAndFeel.addActionListener((event) -> {
+        addMenuItem(lookAndFeelMenu, "Универсальная схема", KeyEvent.VK_S, (event) -> {
             frame.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             frame.invalidate();
         });
-        lookAndFeelMenu.add(crossplatformLookAndFeel);
         
         return lookAndFeelMenu;
     }
 
     public JMenu createTestMenu() {
-        JMenu testMenu = new JMenu("Тесты");
-        testMenu.setMnemonic(KeyEvent.VK_T);
-        testMenu.getAccessibleContext().setAccessibleDescription(
-                "Тестовые команды");
+        JMenu testMenu = createMenu("Тесты", KeyEvent.VK_T, "естовые команды");
         
-        JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
-        addLogMessageItem.addActionListener((event) -> {
+        addMenuItem(testMenu, "Сообщение в лог", KeyEvent.VK_S, (event) -> {
             Logger.debug("Новая строка");
         });
-        testMenu.add(addLogMessageItem);
         
         return testMenu;
     }
 
     public JMenu createFileMenu() {
-        JMenu fileMenu = new JMenu("Файл");
-        fileMenu.setMnemonic(KeyEvent.VK_F); 
-        fileMenu.getAccessibleContext().setAccessibleDescription(
-                "Действия с файлами");
+        JMenu fileMenu = createMenu("Файл", KeyEvent.VK_F, "Действия с файлами");
         
-        JMenuItem exitItem = new JMenuItem("Выход", KeyEvent.VK_X); 
-        exitItem.addActionListener((event) -> {
+        addMenuItem(fileMenu, "Выход", KeyEvent.VK_X, (event) -> {
             frame.exitApplication();
         });
-        fileMenu.add(exitItem);
         
         return fileMenu;
     }
 
-    // вынести одинаковые строки в метод: создать меню, добавить айтем, +создать айтем
+    // вынесли одинаковые строки в отдельные методы
+    private JMenu createMenu(String title, int mnemonic, String description) {
+        JMenu menu = new JMenu(title);
+        menu.setMnemonic(mnemonic);
+        menu.getAccessibleContext().setAccessibleDescription(description);
+        return menu;
+    }
+
+    private void addMenuItem(JMenu menu, String text, int mnemonic, ActionListener listener) {
+        JMenuItem menuItem = new JMenuItem(text, mnemonic);
+        menuItem.addActionListener(listener);
+        menu.add(menuItem);
+    }
 }
