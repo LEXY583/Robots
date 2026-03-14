@@ -22,6 +22,9 @@ public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final WindowConfigManager configManager = new WindowConfigManager();
     
+    private LogWindow logWindow;
+    private GameWindow gameWindow;
+    
     public MainApplicationFrame() {
         configManager.loadFromFile(); // загружаем конфигурацию
 
@@ -34,14 +37,15 @@ public class MainApplicationFrame extends JFrame {
         setContentPane(desktopPane);
         
         
-        LogWindow logWindow = createLogWindow();
+        logWindow = createLogWindow();
         addWindow(logWindow);
 
-        GameWindow gameWindow = new GameWindow();
+        gameWindow = new GameWindow();
         gameWindow.setSize(400,  400);
         addWindow(gameWindow);
 
-        restoreWindowsState(); // востанавливаем состояния окон после создания
+        restoreWindowState(logWindow.getTitle(), logWindow);
+        restoreWindowState(gameWindow.getTitle(), gameWindow);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -109,19 +113,10 @@ public class MainApplicationFrame extends JFrame {
     } 
     
     // метод восстановления состояния окон
-    private void restoreWindowsState() {
-        for (JInternalFrame frame : desktopPane.getAllFrames()) {
-            WindowPosition pos = configManager.getWindowState(frame.getTitle());
-            if (pos != null) {
-                frame.setBounds(pos.x, pos.y, pos.width, pos.height);
-                try {
-                    if (pos.isMaximum) {
-                        frame.setMaximum(true);
-                    } else if (pos.isIcon) {
-                        frame.setIcon(true);
-                    }
-                } catch (PropertyVetoException e) {}
-            }
+    private void restoreWindowState(String windowId, JInternalFrame window) {
+        WindowPosition savedState = configManager.getWindowState(windowId);
+        if (savedState != null) {
+            savedState.applyTo(window);
         }
     }
 
@@ -132,4 +127,5 @@ public class MainApplicationFrame extends JFrame {
         }
         configManager.saveToFile();
     }
+
 }
