@@ -16,7 +16,7 @@ public class RobotModel extends Observable {
     
     // константы движения
     private static final double MAX_VELOCITY = 0.1;
-    private static final double MAX_ANGULAR_VELOCITY = 0.001;
+    private static final double MAX_ANGULAR_VELOCITY = 0.01;
     
     // флаг для остановки движения
     private boolean moving = true;
@@ -55,7 +55,7 @@ public class RobotModel extends Observable {
         if (!moving) return;
         
         double distance = distanceToTarget();
-        if (distance < 0.5) {
+        if (distance < 2.0) {
             moving = false;
             setChanged();
             notifyObservers("stopped");
@@ -64,28 +64,43 @@ public class RobotModel extends Observable {
         
         double angleToTarget = angleToTarget();
         double angularVelocity = calculateAngularVelocity(angleToTarget);
-        double velocity = MAX_VELOCITY;
+        double velocity = calculateVelocity(angleToTarget);;
         
         moveRobot(velocity, angularVelocity, duration);
     }
     
     private double calculateAngularVelocity(double angleToTarget) {
-        // исправление ошибки с поворотом, учитываем нормализованные углы.
         double angleDifference = angleToTarget - direction;
         
         // нормализуем разницу углов в диапазон [-п, п]
         while (angleDifference > Math.PI) angleDifference -= 2 * Math.PI;
         while (angleDifference < -Math.PI) angleDifference += 2 * Math.PI;
         
-        if (Math.abs(angleDifference) < 0.01) {
+        if (Math.abs(angleDifference) < 0.05) {
             return 0;
         }
+
+        double angularSpeed = MAX_ANGULAR_VELOCITY;
+        if (Math.abs(angleDifference) < 0.3) {
+            angularSpeed = MAX_ANGULAR_VELOCITY * 0.5;
+        }
         
-        // поворачиваем в ту сторону, где разница меньше
         if (angleDifference > 0) {
-            return MAX_ANGULAR_VELOCITY;
+            return angularSpeed;
         } else {
-            return -MAX_ANGULAR_VELOCITY;
+            return -angularSpeed;
+        }
+    }
+
+    private double calculateVelocity(double angleToTarget) {
+        double angleDifference = Math.abs(normalizeAngle(angleToTarget - direction));
+        
+        if (angleDifference < 0.2) {
+            return MAX_VELOCITY;
+        } else if (angleDifference < 0.5) {
+            return MAX_VELOCITY * 0.8;
+        } else {
+            return MAX_VELOCITY * 0.5;
         }
     }
     
@@ -96,7 +111,7 @@ public class RobotModel extends Observable {
         double newX = x;
         double newY = y;
         
-        if (Math.abs(angularVelocity) < 1e-10) {
+        if (Math.abs(angularVelocity) < 0.0001) {
             newX = x + velocity * duration * Math.cos(direction);
             newY = y + velocity * duration * Math.sin(direction);
         } else {

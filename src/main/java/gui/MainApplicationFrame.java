@@ -17,16 +17,20 @@ import java.beans.PropertyVetoException;
 
 import log.Logger;
 
+import model.RobotModel;
+
 public class MainApplicationFrame extends JFrame {
 
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final WindowConfigManager configManager = new WindowConfigManager();
+    private final RobotModel robotModel = new RobotModel(); // создаем модель
     
     private LogWindow logWindow;
     private GameWindow gameWindow;
+    private CoordinatesWindow coordinatesWindow; // объявление окна
     
     public MainApplicationFrame() {
-        configManager.loadFromFile(); // загружаем конфигурацию
+        configManager.loadFromFile(); 
 
         int inset = 50;        
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -40,12 +44,17 @@ public class MainApplicationFrame extends JFrame {
         logWindow = createLogWindow();
         addWindow(logWindow);
 
-        gameWindow = new GameWindow();
+        gameWindow = new GameWindow(robotModel); // передали robotModel
         gameWindow.setSize(400,  400);
         addWindow(gameWindow);
 
+        // создаем окно с координатами
+        coordinatesWindow = new CoordinatesWindow(robotModel);
+        addWindow(coordinatesWindow);
+
         restoreWindowState(logWindow.getTitle(), logWindow);
         restoreWindowState(gameWindow.getTitle(), gameWindow);
+        restoreWindowState(coordinatesWindow.getTitle(), coordinatesWindow);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
