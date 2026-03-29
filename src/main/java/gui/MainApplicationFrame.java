@@ -23,11 +23,12 @@ public class MainApplicationFrame extends JFrame {
 
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final WindowConfigManager configManager = new WindowConfigManager();
-    private final RobotModel robotModel = new RobotModel(); // создаем модель
+    private final RobotModel robotModel = new RobotModel();
     
     private LogWindow logWindow;
     private GameWindow gameWindow;
-    private CoordinatesWindow coordinatesWindow; // объявление окна
+    private CoordinatesWindow coordinatesWindow; 
+    private MusicWindow musicWindow;
     
     public MainApplicationFrame() {
         configManager.loadFromFile(); 
@@ -44,17 +45,20 @@ public class MainApplicationFrame extends JFrame {
         logWindow = createLogWindow();
         addWindow(logWindow);
 
-        gameWindow = new GameWindow(robotModel); // передали robotModel
+        gameWindow = new GameWindow(robotModel);
         gameWindow.setSize(400,  400);
         addWindow(gameWindow);
 
-        // создаем окно с координатами
         coordinatesWindow = new CoordinatesWindow(robotModel);
         addWindow(coordinatesWindow);
+
+        musicWindow = new MusicWindow();
+        addWindow(musicWindow);
 
         restoreWindowState(logWindow.getTitle(), logWindow);
         restoreWindowState(gameWindow.getTitle(), gameWindow);
         restoreWindowState(coordinatesWindow.getTitle(), coordinatesWindow);
+        restoreWindowState(musicWindow.getTitle(), musicWindow);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
