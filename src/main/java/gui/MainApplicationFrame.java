@@ -140,5 +140,4 @@ public class MainApplicationFrame extends JFrame {
         }
         configManager.saveToFile();
     }
-
 }
