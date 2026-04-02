@@ -1,17 +1,30 @@
 package gui;
 
-import javax.swing.*;
+import javax.swing.JInternalFrame;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.JButton;
+import javax.swing.JSlider;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.io.File;
-import java.util.ArrayList;
+import javax.swing.ImageIcon;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.util.List;
-import model.MusicPlayer;
+
+import controller.MusicController;
 
 // графический интерфейс окна плеера
-public class MusicWindow extends JInternalFrame {
+public class MusicWindow extends JInternalFrame implements MusicController.MusicUIListener { // MusicWindow реализует интерфейс MusicUIListener
     
-    private MusicPlayer musicPlayer; // ссылка на модель
+    private MusicController controller; // контроллер, который управляет музыкальной логикой
     private DefaultListModel<String> playlistModel; // модель данных для списка треков
     private JList<String> playlistList; // список для отображения плейлиста
 
@@ -26,20 +39,17 @@ public class MusicWindow extends JInternalFrame {
     
     public MusicWindow() {
         super("Музыкальный плеер", true, true, true, true);
-        
-        musicPlayer = new MusicPlayer(); // экземпляр плеера
+
+        // созаем контроллер и подписываем текущее окно на его события
+        controller = new MusicController();
+        controller.setUIListener(this);
         
         initComponents(); // заполнение окошка при запуске
         setupEventHandlers(); // установка обработчиков событий
-        loadMusicFromResources(); // загрузка музыки
-        
-        // если трек закончился - включаем следующий
-        musicPlayer.setOnTrackCompleteListener(() -> {
-            SwingUtilities.invokeLater(() -> {
-                musicPlayer.nextTrack();
-                updateUIFromModel();
-            });
-        });
+
+        // Загружаем музыку
+        java.net.URL musicUrl = getClass().getClassLoader().getResource("music");
+        controller.loadMusicFromFolder(musicUrl);
         
         setSize(350, 400);
         setLocation(100, 100);
@@ -48,36 +58,46 @@ public class MusicWindow extends JInternalFrame {
     // метод заполнения окошка при  запуске
     private void initComponents() { 
         setLayout(new BorderLayout());
-        
-        // верхняя панель с элементами управления
+        add(createTopPanel(), BorderLayout.NORTH);
+        add(createPlaylistPanel(), BorderLayout.CENTER);
+        add(createBottomPanel(), BorderLayout.SOUTH);
+    }
+
+    // создание верхней панели
+    private JPanel createTopPanel() {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
-        
-        // панель с кнопками управления и громкостью
+        topPanel.add(createControlPanel(), BorderLayout.CENTER);
+        topPanel.add(createVolumePanel(), BorderLayout.EAST);
+        return topPanel;
+    }
+    
+    // создание панели кнопок управления
+    private JPanel createControlPanel() {
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         
-        // создаем кнопки воспроизведения
-        prevButton = new JButton(loadIcon("img/previous.png"));
-        playPauseButton = new JButton(loadIcon("img/play.png"));
-        nextButton = new JButton(loadIcon("img/next.png"));
-        
-        prevButton.setToolTipText("Предыдущий трек");
-        playPauseButton.setToolTipText("Воспроизвести");
-        nextButton.setToolTipText("Следующий трек");
-        
-        // убираем фон и рамку у кнопок
-        prevButton.setContentAreaFilled(false);
-        prevButton.setBorderPainted(false);
-        playPauseButton.setContentAreaFilled(false);
-        playPauseButton.setBorderPainted(false);
-        nextButton.setContentAreaFilled(false);
-        nextButton.setBorderPainted(false);
+        prevButton = createStyledButton("img/previous.png", "Предыдущий трек");
+        playPauseButton = createStyledButton("img/play.png", "Воспроизвести");
+        nextButton = createStyledButton("img/next.png", "Следующий трек");
         
         controlPanel.add(prevButton);
         controlPanel.add(playPauseButton);
         controlPanel.add(nextButton);
         
-        // панель с регулятором громкости
+        return controlPanel;
+    }
+
+    // создание отдельной кнопки
+    private JButton createStyledButton(String iconPath, String toolTip) {
+        JButton button = new JButton(loadIcon(iconPath));
+        button.setToolTipText(toolTip);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        return button;
+    }
+    
+    // создание панели управления громкостью
+    private JPanel createVolumePanel() {
         JPanel volumePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         JLabel volumeIcon = new JLabel(loadIcon("img/volume.png"));
         volumeIcon.setToolTipText("Громкость");
@@ -87,33 +107,34 @@ public class MusicWindow extends JInternalFrame {
         volumeSlider.setPreferredSize(new Dimension(100, 25));
         volumePanel.add(volumeSlider);
         
-        topPanel.add(controlPanel, BorderLayout.CENTER);
-        topPanel.add(volumePanel, BorderLayout.EAST);
-        add(topPanel, BorderLayout.NORTH);
-        
-        // список плейлиста
+        return volumePanel;
+    }
+    
+    // создание центральной панели-плейлиста
+    private JScrollPane createPlaylistPanel() {
         playlistModel = new DefaultListModel<>();
         playlistList = new JList<>(playlistModel);
         playlistList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         playlistList.setFont(new Font("Arial", Font.PLAIN, 12));
+        
         JScrollPane scrollPane = new JScrollPane(playlistList);
         scrollPane.setBorder(new EmptyBorder(10, 10, 10, 10));
-        add(scrollPane, BorderLayout.CENTER);
-        
-        // нижняя панель с информацией о текущем треке
+        return scrollPane;
+    }
+    
+    // создание нижней панели инф-и о текущем треке
+    private JPanel createBottomPanel() {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         bottomPanel.setBorder(new EmptyBorder(5, 10, 10, 10));
         
-        // иконка песни слева
         songIconLabel = new JLabel(loadIcon("img/song.png"));
         bottomPanel.add(songIconLabel);
         
-        // текст с названием трека
         currentTrackLabel = new JLabel("Нет трека");
         currentTrackLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         bottomPanel.add(currentTrackLabel);
         
-        add(bottomPanel, BorderLayout.SOUTH);
+        return bottomPanel;
     }
     
     // метод загрузки иконки
@@ -127,109 +148,64 @@ public class MusicWindow extends JInternalFrame {
     
     // метод настройки обработчиков событий
     private void setupEventHandlers() {
-        playPauseButton.addActionListener(e -> togglePlayPause());
-        prevButton.addActionListener(e -> {
-            musicPlayer.previousTrack();
-            updateUIFromModel();
-        });
-        nextButton.addActionListener(e -> {
-            musicPlayer.nextTrack();
-            updateUIFromModel();
-        });
+        playPauseButton.addActionListener(e -> controller.playPause());
+        prevButton.addActionListener(e -> controller.previousTrack());
+        nextButton.addActionListener(e -> controller.nextTrack());
         
         playlistList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                int selectedIndex = playlistList.getSelectedIndex();
-                if (selectedIndex >= 0 && musicPlayer.hasPlaylist() && selectedIndex < musicPlayer.getPlaylist().size()) {
-                    musicPlayer.playTrack(selectedIndex);
-                    updateUIFromModel();
+                int index = playlistList.getSelectedIndex();
+                if (index >= 0 && controller.hasPlaylist() && index < controller.getPlaylistSize()) {
+                    controller.playSelectedTrack(index);
                 }
             }
         });
         
-        volumeSlider.addChangeListener(e -> {
-            musicPlayer.setVolume(volumeSlider.getValue());
-        });
+        volumeSlider.addChangeListener(e -> controller.setVolume(volumeSlider.getValue()));
     }
-    
-    // метод загрузки музыки
-    private void loadMusicFromResources() {
-        List<File> musicFiles = new ArrayList<>();
-        
-        try {
-            java.net.URL musicUrl = getClass().getClassLoader().getResource("music");
-            if (musicUrl != null) {
-                File musicFolder = new File(musicUrl.toURI());
-                File[] files = musicFolder.listFiles((dir, name) -> 
-                    name.toLowerCase().endsWith(".mp3") || 
-                    name.toLowerCase().endsWith(".wav"));
-                
-                if (files != null && files.length > 0) {
-                    for (File file : files) {
-                        musicFiles.add(file);
-                        String fileName = file.getName();
-                        String trackName = fileName.substring(0, fileName.lastIndexOf('.'));
-                        playlistModel.addElement("♪ " + trackName);
-                    }
-                    musicPlayer.setPlaylist(musicFiles);
-                } else {
-                    playlistModel.addElement("Нет музыкальных файлов");
-                }
+
+    // реализация интерфейса MusicUIListener
+    @Override
+    public void onPlaylistLoaded(List<String> trackNames) {
+        SwingUtilities.invokeLater(() -> {
+            playlistModel.clear();
+            if (trackNames.isEmpty()) {
+                playlistModel.addElement("Нет музыкальных файлов");
             } else {
-                playlistModel.addElement("Папка music не найдена в resources");
+                for (String name : trackNames) {
+                    playlistModel.addElement("♪ " + name);
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            playlistModel.addElement("Ошибка загрузки музыки: " + e.getMessage());
-        }
+        });
     }
     
-    // метод обновления интерфейса
-    private void updateUIFromModel() {
-        if (musicPlayer.hasPlaylist()) {
-            String trackName = musicPlayer.getCurrentTrackName();
+    @Override
+    public void onTrackChanged(String trackName, int index) {
+        SwingUtilities.invokeLater(() -> {
             currentTrackLabel.setText("Сейчас играет - " + trackName);
-            
-            int currentIndex = musicPlayer.getCurrentTrackIndex();
-            if (currentIndex >= 0 && currentIndex < playlistModel.size()) {
-                playlistList.setSelectedIndex(currentIndex);
+            if (index >= 0 && index < playlistModel.size()) {
+                playlistList.setSelectedIndex(index);
             }
-            if (musicPlayer.isPlaying()) {
+        });
+    }
+    
+    @Override
+    public void onPlayStateChanged(boolean isPlaying) {
+        SwingUtilities.invokeLater(() -> {
+            if (isPlaying) {
                 playPauseButton.setIcon(loadIcon("img/pause.png"));
                 playPauseButton.setToolTipText("Пауза");
             } else {
                 playPauseButton.setIcon(loadIcon("img/play.png"));
                 playPauseButton.setToolTipText("Воспроизвести");
             }
-        } else {
-            currentTrackLabel.setText("Нет трека");
-            playPauseButton.setIcon(loadIcon("img/play.png"));
-            playPauseButton.setToolTipText("Воспроизвести");
-        }
-    }
-    
-    // метод преключения play/pause
-    private void togglePlayPause() {
-        if (musicPlayer.isPlaying()) {
-            musicPlayer.pause();
-            updateUIFromModel();
-        } else {
-            if (musicPlayer.hasPlaylist()) {
-                if (musicPlayer.getCurrentPosition() > 0) {
-                    musicPlayer.resume();
-                } else {
-                    musicPlayer.playCurrentTrack();
-                }
-                updateUIFromModel();
-            }
-        }
+        });
     }
     
     // переопределение закрытия окна, останавливаем музыку перед закрытием
-    @Override
     public void dispose() {
-        if (musicPlayer != null) {
-            musicPlayer.stop();
+        if (controller != null) { 
+            controller.stop();
         }
         super.dispose();
     }

@@ -1,5 +1,5 @@
 // Точка входа в программу
-package gui;
+package launcher;
 
 import java.awt.Frame;
 
@@ -7,6 +7,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import java.util.Locale;
+
+import utils.RussianLocalizer;
+import gui.MainApplicationFrame;
 
 public class RobotsProgram {
   public static void main(String[] args) {

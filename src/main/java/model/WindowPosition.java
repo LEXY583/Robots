@@ -1,9 +1,9 @@
-package gui;
+package model;
 
 import java.io.Serializable;
 import javax.swing.JInternalFrame;
 
-// класс хранения состояния окна
+// Класс хранения состояния окна
 public class WindowPosition implements Serializable { 
 
     private static final long serialVersionUID = 1L;

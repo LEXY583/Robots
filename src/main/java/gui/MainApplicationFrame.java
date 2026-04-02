@@ -1,11 +1,12 @@
 package gui;
 
-import javax.swing.JDesktopPane;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyVetoException;
 
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuBar;
@@ -13,11 +14,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.JOptionPane;
-import java.beans.PropertyVetoException;
 
 import log.Logger;
-
 import model.RobotModel;
+import model.WindowPosition;
+import utils.WindowConfigManager;
 
 public class MainApplicationFrame extends JFrame {
 

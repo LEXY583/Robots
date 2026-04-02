@@ -23,7 +23,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.3</version>
                 <configuration>
-                    <mainClass>gui.RobotsProgram</mainClass>
+                    <mainClass>launcher.RobotsProgram</mainClass>
                 </configuration>
             </plugin>
         </plugins>

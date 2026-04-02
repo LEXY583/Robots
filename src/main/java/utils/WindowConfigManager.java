@@ -1,11 +1,20 @@
-package gui;
+package utils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream; 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.JInternalFrame;
 
-// класс управления состояниями окна
+import model.WindowPosition;
+
+// Класс управления состояниями окна
 public class WindowConfigManager { 
     private static final String CONFIG_FILE = 
         System.getProperty("user.home") + File.separator + ".robots_config.dat";

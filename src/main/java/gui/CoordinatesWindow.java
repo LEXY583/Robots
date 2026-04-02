@@ -1,9 +1,16 @@
 package gui;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.BorderFactory;
+
+import java.awt.GridLayout;
+
 import java.util.Observable;
 import java.util.Observer;
+
 import model.RobotModel;
 
 public class CoordinatesWindow extends JInternalFrame implements Observer {
