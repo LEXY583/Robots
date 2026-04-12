@@ -118,7 +118,6 @@ public class MusicController {
             playCurrentTrack();
         }
     }
-    
 
     // управление воспроизведением
     public void playCurrentTrack() {

@@ -54,7 +54,6 @@ public class Menu {
         return fileMenu;
     }
 
-    // вынесли одинаковые строки в отдельные методы
     private JMenu createMenu(String title, int mnemonic, String description) {
         JMenu menu = new JMenu(title);
         menu.setMnemonic(mnemonic);

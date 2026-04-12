@@ -2,10 +2,6 @@ package gui;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyVetoException;
-
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -42,12 +38,11 @@ public class MainApplicationFrame extends JFrame {
 
         setContentPane(desktopPane);
         
-        
         logWindow = createLogWindow();
         addWindow(logWindow);
 
-        gameWindow = new GameWindow(robotModel);
-        gameWindow.setSize(400,  400);
+        gameWindow = new GameWindow(robotModel, this);
+        gameWindow.setSize(400, 400);
         addWindow(gameWindow);
 
         coordinatesWindow = new CoordinatesWindow(robotModel);
@@ -88,32 +83,26 @@ public class MainApplicationFrame extends JFrame {
     
     private JMenuBar generateMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-
         Menu menu = new Menu(this);
-
         menuBar.add(menu.createLookAndFeelMenu());
         menuBar.add(menu.createTestMenu());
         menuBar.add(menu.createFileMenu());
-
         return menuBar;
     }
 
     public void setLookAndFeel(String className){
-        try
-        {
+        try {
             UIManager.setLookAndFeel(className);
             SwingUtilities.updateComponentTreeUI(this);
-        }
-        catch (ClassNotFoundException | InstantiationException
-            | IllegalAccessException | UnsupportedLookAndFeelException e)
-        {
+        } catch (ClassNotFoundException | InstantiationException
+            | IllegalAccessException | UnsupportedLookAndFeelException e) {
             // just ignore
         }
     }
 
     public void exitApplication() { 
         int result = JOptionPane.showConfirmDialog(
-            this, // родительское окно
+            this,
             "Вы хотите выйти из Robots?", 
             "Подтверждение выхода",                 
             JOptionPane.YES_NO_OPTION,             
@@ -121,12 +110,11 @@ public class MainApplicationFrame extends JFrame {
         );
         
         if (result == JOptionPane.YES_OPTION) {
-            saveWindowsState(); // сохраняем состояние окон перед выходом
+            saveWindowsState();
             System.exit(0);
         }
     } 
     
-    // метод восстановления состояния окон
     private void restoreWindowState(String windowId, JInternalFrame window) {
         WindowPosition savedState = configManager.getWindowState(windowId);
         if (savedState != null) {
@@ -134,7 +122,6 @@ public class MainApplicationFrame extends JFrame {
         }
     }
 
-    // метод сохранения состояния окон
     private void saveWindowsState() {
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
             configManager.saveWindowState(frame.getTitle(), frame);
